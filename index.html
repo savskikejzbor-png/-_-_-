@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css">
   <style>
-    :root{--accent:#2b6cb0;--muted:#666}
+    :root{--accent:#2b6cb0;--muted:#666;--card-bg:#fff}
     body{font-family:Inter,Arial,Helvetica,sans-serif;margin:18px;background:#f7f8fb;color:#222}
     .container{max-width:1100px;margin:0 auto}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -14,7 +14,7 @@
     p.lead{margin:6px 0 18px;color:var(--muted)}
     /* stats */
     .stats{display:flex;gap:14px;flex-wrap:wrap;margin:18px 0}
-    .stat{background:#fff;padding:14px;border-radius:10px;min-width:150px;box-shadow:0 1px 6px rgba(20,20,40,0.04);text-align:center}
+    .stat{background:var(--card-bg);padding:14px;border-radius:10px;min-width:150px;box-shadow:0 1px 6px rgba(20,20,40,0.04);text-align:center}
     .stat strong{display:block;font-size:1.4rem}
     /* landing actions */
     .actions{display:flex;gap:10px;align-items:center}
@@ -25,23 +25,58 @@
     .page{display:none}
     .page.active{display:block}
     /* cards grid */
-    #cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:14px}
-    .card{background:#fff;padding:12px;border-radius:10px;box-shadow:0 1px 6px rgba(20,20,40,0.04)}
-    .addr{font-weight:700;margin-bottom:6px}
-    .meta{color:var(--muted);font-size:0.95rem;margin-bottom:8px}
-    .badges{display:flex;gap:8px;flex-wrap:wrap}
-    .badge{padding:6px 8px;border-radius:999px;color:#fff;font-size:0.85rem}
-    .badge.visoka{background:#d9534f}
-    .badge.umerena{background:#f0ad4e;color:#222}
-    .badge.realno{background:#5cb85c}
-    .badge.nestambeni{background:#5bc0de;color:#222}
-    .badge.sporno{background:#6f42c1}
+    #cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:14px}
+    .card {
+      position:relative;
+      background:var(--card-bg);
+      border-radius:10px;
+      padding:14px 14px 14px 18px;
+      box-shadow:0 6px 18px rgba(20,30,60,0.06);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-height:120px;
+    }
+    .card::before{
+      content:"";
+      position:absolute;
+      left:0;top:0;bottom:0;width:8px;border-top-left-radius:10px;border-bottom-left-radius:10px;
+      background:linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02));
+      transform:translateX(-2px);
+    }
+    .card.level-visoka::before{ background:linear-gradient(180deg,#d9534f,#b83a36); }
+    .card.level-umerena::before{ background:linear-gradient(180deg,#f0ad4e,#d08b2e); }
+    .card.level-realno::before{ background:linear-gradient(180deg,#5cb85c,#3f8f3f); }
+    .card.level-nestambeni::before{ background:linear-gradient(180deg,#5bc0de,#3aa6c9); }
+    .card-header { display:flex; align-items:flex-start; gap:12px; }
+    .voters { font-weight:800; font-size:1.6rem; line-height:1; color:#111; min-width:72px; text-align:center; }
+    .addr-wrap { flex:1; display:flex; flex-direction:column; gap:6px; }
+    .address { font-weight:700; font-size:1.02rem; color:#111; word-break:break-word; }
+    .sub { color:#666; font-size:0.9rem; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .ratio { font-weight:700; color:#222; background:#f3f4f6; padding:4px 8px; border-radius:8px; font-size:0.9rem; }
+    .meta-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+    .meta-pill { background:#f6f7fb; padding:6px 8px; border-radius:8px; font-weight:600; color:#222; font-size:0.88rem; }
+    .badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .badge { padding:6px 8px; border-radius:999px; color:#fff; font-size:0.82rem; font-weight:700; }
+    .badge.visoka { background:#d9534f; }
+    .badge.umerena { background:#f0ad4e; color:#222; }
+    .badge.realno { background:#5cb85c; }
+    .badge.nestambeni { background:#5bc0de; color:#222; }
+    .badge.sporno { background:#6f42c1; }
     /* controls */
     .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
     input[type="search"]{padding:8px;border-radius:8px;border:1px solid #ddd;width:260px}
     select{padding:8px;border-radius:8px;border:1px solid #ddd}
     .muted{color:var(--muted);font-size:0.9rem}
     footer{margin-top:22px;color:var(--muted);font-size:0.9rem}
+    /* export button */
+    .export-btn{margin-left:auto;padding:8px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer}
+    @media (max-width:420px){
+      .voters { font-size:1.3rem; min-width:56px; }
+      .card { padding:12px; }
+      input[type="search"]{width:140px}
+    }
   </style>
 </head>
 <body>
@@ -67,7 +102,7 @@
         <div class="stat" role="listitem"><strong id="stat-addresses">66</strong>адреса на листи</div>
         <div class="stat" role="listitem"><strong id="stat-voters">1.706</strong>уписаних бирача</div>
         <div class="stat" role="listitem"><strong id="stat-streets">44</strong>улица</div>
-        <div class="stat" role="listitem"><strong id="stat-verified">24 / 66</strong>проверено на терену</div>
+        <div class="stat" role="listitem"><strong id="stat-verified">6 / 66</strong>проверено на терену</div>
       </div>
 
       <div style="display:flex;gap:12px;align-items:center">
@@ -99,6 +134,7 @@
           <option value="i dalje sporno">И даље спорно</option>
         </select>
         <button id="reload" class="btn primary">Учитај NOVI_BEOGRAD_V1.csv</button>
+        <button id="exportFiltered" class="export-btn">Извези филтрирано</button>
         <div class="muted">Ако fetch не пронађе фајл, кликни на дугме и отпреми локално.</div>
       </div>
 
@@ -110,19 +146,16 @@
     </section>
   </div>
 
-  <!-- Скрипте -->
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
-    // Конфигурација
     const CSV_NAME = "NOVI_BEOGRAD_V1.csv";
 
-    // Прелаз између страна
+    // Stranice
     const pageLanding = document.getElementById('page-landing');
     const pageCards = document.getElementById('page-cards');
     document.getElementById('btnContinue').addEventListener('click', ()=> {
       pageLanding.classList.remove('active');
       pageCards.classList.add('active');
-      // аутоматски покушај учитавања CSV-а
       loadAndRenderCSV();
     });
     document.getElementById('btnBack').addEventListener('click', ()=> {
@@ -130,12 +163,7 @@
       pageLanding.classList.add('active');
     });
 
-    // Једноставан language toggle (само пример, не мења садржај)
-    document.getElementById('langToggle').addEventListener('click', ()=>{
-      alert('Пребацивање писма: кратак пример (не мења садржај у овом шаблону).');
-    });
-
-    // Помоћне функције
+    // Helpers
     function normalize(s){ return (s||"").toString().trim(); }
     function findColumn(obj, candidates){
       for(const c of candidates){
@@ -159,43 +187,66 @@
       return badges;
     }
 
+    // Render kartice (stilizovano)
     function renderCard(row){
       const addrKey = findColumn(row, ["column1","адреса","address","column"]);
       const votersKey = findColumn(row, ["biracaukupno","birača","birača ukupno","birača"]);
-      const stanovaKey = findColumn(row, ["stanova","apartments"]);
+      const stanovaKey = findColumn(row, ["stanova","apartments","stanovi"]);
       const povKey = findColumn(row, ["povrsina","површина","površinaosnove"]);
       const tipKey = findColumn(row, ["tipobjekta","tip","tip objekta"]);
       const prebKey = findColumn(row, ["prebivaliste","prebivalište"]);
       const borKey = findColumn(row, ["boraviste","boravište"]);
 
       const addr = normalize(addrKey ? row[addrKey] : "");
-      const voters = normalize(votersKey ? row[votersKey] : "");
-      const stanova = normalize(stanovaKey ? row[stanovaKey] : "");
+      const votersRaw = normalize(votersKey ? row[votersKey] : "");
+      const stanovaRaw = normalize(stanovaKey ? row[stanovaKey] : "");
       const pov = normalize(povKey ? row[povKey] : "");
       const tip = normalize(tipKey ? row[tipKey] : "");
       const preb = normalize(prebKey ? row[prebKey] : "");
       const bor = normalize(borKey ? row[borKey] : "");
 
+      const votersNum = parseFloat(String(votersRaw).replace(/\./g,'').replace(/,/g,'.')) || 0;
+      const stanovaNum = parseFloat(String(stanovaRaw).replace(/\./g,'').replace(/,/g,'.')) || 0;
+      const ratio = (stanovaNum > 0) ? (votersNum / stanovaNum) : null;
+      const ratioText = ratio ? (Math.round(ratio*100)/100).toString().replace('.',',') + "× po stanu" : "—";
+
       const badges = mapBadges(row);
+      let levelClass = "level-realno";
+      if(badges.some(b=>b.cls==="visoka")) levelClass = "level-visoka";
+      else if(badges.some(b=>b.cls==="umerena")) levelClass = "level-umerena";
+      else if(badges.some(b=>b.cls==="nestambeni")) levelClass = "level-nestambeni";
 
       const card = document.createElement("div");
-      card.className = "card";
+      card.className = "card " + levelClass;
       card.dataset.addr = addr.toLowerCase();
-      card.dataset.voters = voters;
+      card.dataset.voters = String(votersNum);
       card.dataset.type = badges.map(b=>b.text.toLowerCase()).join(" ");
 
-      const addrHtml = `<div class="addr">${addr || "<span style='color:#b00;font-weight:700'>Адреса није унетa</span>"}</div>`;
-      const metaHtml = `<div class="meta"><strong>${voters||"—"}</strong> бирача · ${stanova? stanova + " станова" : "станови: н/д"}</div>`;
-      const details = `<div style="margin-top:8px;color:var(--muted);font-size:0.95rem">
-        Тип: ${tip || "н/д"} · Површина: ${pov || "н/д"} · Пребивалиште: ${preb || "н/д"}
+      const votersHtml = `<div class="voters">${votersNum ? votersNum.toLocaleString('sr-RS') : '—'}</div>`;
+      const addrHtml = `<div class="address">${addr || "<span style='color:#b00;font-weight:700'>Адреса није унетa</span>"}</div>`;
+      const subHtml = `${stanovaRaw ? stanovaRaw + ' stanova · ' + ratioText : ratioText}`;
+      const metaHtml = `<div class="meta-row">
+        <div class="meta-pill">Тип: ${tip || 'н/д'}</div>
+        <div class="meta-pill">Површина: ${pov || 'н/д'}</div>
+        <div class="meta-pill">Пребивалиште: ${preb || 'н/д'}</div>
       </div>`;
-      const badgesHtml = `<div class="badges" style="margin-top:10px">${badges.map(b=>`<span class="badge ${b.cls}">${b.text}</span>`).join("")}</div>`;
+      const badgesHtml = `<div class="badges">${badges.map(b=>`<span class="badge ${b.cls}">${b.text}</span>`).join('')}</div>`;
 
-      card.innerHTML = addrHtml + metaHtml + details + badgesHtml;
+      card.innerHTML = `
+        <div class="card-header">
+          ${votersHtml}
+          <div class="addr-wrap">
+            ${addrHtml}
+            <div class="sub">${subHtml}</div>
+          </div>
+        </div>
+        ${metaHtml}
+        ${badgesHtml}
+      `;
       return card;
     }
 
-    // Учитавање CSV-а
+    // Učitavanje CSV
     async function fetchCSVText(name){
       try {
         const r = await fetch(name);
@@ -207,16 +258,7 @@
       }
     }
 
-    async function loadAndRenderCSV(){
-      const text = await fetchCSVText(CSV_NAME);
-      if(!text){
-        // ако нема фајла на серверу, остави празно — корисник може да кликне на дугме и отпреми
-        return;
-      }
-      renderFromText(text);
-    }
-
-    function renderFromText(text){
+    function parseAndRender(text){
       const sample = text.slice(0,2000);
       const delim = (sample.match(/\t/g)||[]).length > (sample.match(/,/g)||[]).length ? "\t" : ",";
       const parsed = Papa.parse(text, { delimiter: delim, skipEmptyLines: true });
@@ -229,13 +271,24 @@
         return obj;
       });
 
+      // ostavljamo statičke vrednosti na landing strani (66, 1.706, 44, 6/66)
       const container = document.getElementById("cards");
       container.innerHTML = "";
       objects.forEach(o => container.appendChild(renderCard(o)));
       applyFilters();
+      window._currentObjects = objects;
     }
 
-    // Филтер и отпремање
+    async function loadAndRenderCSV(){
+      const text = await fetchCSVText(CSV_NAME);
+      if(!text){
+        // fetch nije uspeo; korisnik može ručno da otpremi
+        return;
+      }
+      parseAndRender(text);
+    }
+
+    // Filter i pretraga
     function applyFilters(){
       const q = document.getElementById("search").value.trim().toLowerCase();
       const type = document.getElementById("filterType").value.trim().toLowerCase();
@@ -246,14 +299,13 @@
         c.style.display = (matchesQ && matchesType) ? "" : "none";
       });
     }
-
     document.getElementById('search').addEventListener('input', applyFilters);
     document.getElementById('filterType').addEventListener('change', applyFilters);
 
+    // Reload / file picker
     document.getElementById('reload').addEventListener('click', async ()=>{
       const text = await fetchCSVText(CSV_NAME);
       if(!text){
-        // отвори file picker
         const fi = document.createElement("input");
         fi.type = "file";
         fi.accept = ".csv,text/csv,text/plain";
@@ -261,19 +313,49 @@
           const f = e.target.files[0];
           if(!f) return;
           const reader = new FileReader();
-          reader.onload = ev => renderFromText(ev.target.result);
+          reader.onload = ev => parseAndRender(ev.target.result);
           reader.readAsText(f, "utf-8");
         };
         fi.click();
         return;
       }
-      renderFromText(text);
+      parseAndRender(text);
     });
 
-    // Аутоматски покушај учитавања при отварању странице (landing -> cards ће покренути поново)
+    // Izvoz filtriranih kartica u CSV
+    function exportFilteredCSV(){
+      const cards = Array.from(document.querySelectorAll(".card")).filter(c => c.style.display !== 'none');
+      if(cards.length === 0){ alert("Нема видљивих резултата за извоз."); return; }
+      const objs = window._currentObjects || [];
+      const visibleAddrs = cards.map(c => c.dataset.addr);
+      const filtered = objs.filter(o => {
+        const addrKey = findColumn(o, ["column1","адреса","address","column"]);
+        const addr = normalize(addrKey ? o[addrKey] : "").toLowerCase();
+        return visibleAddrs.includes(addr);
+      });
+      if(filtered.length === 0){ alert("Нема података за извоз."); return; }
+      const keys = Object.keys(filtered[0]);
+      const rows = [keys.join(",")].concat(filtered.map(r => keys.map(k => `"${(r[k]||"").toString().replace(/"/g,'""')}"`).join(",")));
+      const csv = rows.join("\n");
+      const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'filtered_novi_beograd.csv';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById('exportFiltered').addEventListener('click', exportFilteredCSV);
+
+    // Auto-load on landing->cards transition; otherwise user can click "Учитај"
     (async ()=> {
-      // ништа посебно овде; учитавање се покреће када корисник пређе на другу страну
+      // ništa posebno; učitavanje se pokreće kada korisnik klikne "Настави" ili "Учитај"
     })();
   </script>
 </body>
 </html>
+
+ 
+   
