@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <title>Адресе са неуобичајеним бројем бирача – Нови Београд</title>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    .stats { display: flex; gap: 20px; margin: 20px 0; }
+    .stat-box { background: #f0f0f0; padding: 15px; border-radius: 8px; text-align: center; }
+    .stat-box strong { font-size: 1.5em; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Адресе са неуобичајеним бројем бирача – Општина Нови Београд</h1>
+
+  <p>
+    Број уписаних бирача на адреси је јаван податак. Процена броја станова долази из евиденције о објектима и није званична.
+    Однос та два броја није доказ неправилности — он само показује где је вредно питати некога ко познаје крај.
+  </p>
+
+  <p>
+    На листи нема имена, презимена, бројева станова ни било ког податка о конкретним људима, и неће их бити.
+    Адресе које су комшије већ провериле носе ознаку налаза. „Делује реално” најчешће значи да један број покрива више улаза или дворишних објеката,
+    па висок број бирача има уредно објашњење. „И даље спорно” значи да провера није отклонила сумњу.
+  </p>
+
+  <div class="stats">
+    <div class="stat-box"><strong>77</strong>адреса на листи</div>
+    <div class="stat-box"><strong>3.336</strong>уписаних бирача</div>
+    <div class="stat-box"><strong>44</strong>улице</div>
+    <div class="stat-box"><strong>24 / 77</strong>проверено на терену</div>
+  </div>
+
+  <h2>Преглед CSV података</h2>
+  <table id="tabela" class="display" style="width:100%"></table>
+
+  <!-- jQuery + DataTables JS -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+  <script>
+    async function loadCSV() {
+      const response = await fetch("NOVI_BEOGRAD.csv");
+      const text = await response.text();
+      const rows = text.trim().split("\n").map(r => r.split(","));
+      let header = rows[0];
+      let data = rows.slice(1);
+
+      // Креирај заглавље
+      let thead = "<thead><tr>" + header.map(h => `<th>${h}</th>`).join("") + "</tr></thead>";
+      let tbody = "<tbody>";
+      data.forEach(r => {
+        tbody += "<tr>" + r.map(c => `<td>${c}</td>`).join("") + "</tr>";
+      });
+      tbody += "</tbody>";
+
+      document.getElementById("tabela").innerHTML = thead + tbody;
+
+      // Активирај DataTables
+      $('#tabela').DataTable({
+        pageLength: 10,
+        language: {
+          url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/sr.json"
+        }
+      });
+    }
+    loadCSV();
+  </script>
+</body>
+</html>
