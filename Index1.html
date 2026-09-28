@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="utf-8" />
+  <title>Адресе — Нови Београд</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --accent:#2b6cb0; --muted:#666; --card-bg:#fff;
+      --danger:#d9534f; --warn:#f0ad4e; --ok:#5cb85c; --info:#5bc0de;
+    }
+    body{font-family:Arial,Helvetica,sans-serif;margin:18px;background:#f7f8fb;color:#222}
+    .container{max-width:1200px;margin:0 auto}
+    header{display:flex;justify-content:space-between;align-items:center}
+    h1{margin:0;font-size:1.4rem}
+    .lead{color:var(--muted);margin:6px 0 18px}
+    .stats{display:flex;gap:14px;flex-wrap:wrap;margin:18px 0}
+    .stat{background:#fff;padding:14px;border-radius:10px;min-width:150px;box-shadow:0 1px 6px rgba(20,20,40,0.04);text-align:center}
+    .stat strong{display:block;font-size:1.4rem}
+    .btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+    .btn.primary{background:var(--accent);color:#fff}
+    .btn.ghost{background:#fff;border:1px solid #ddd}
+    .page{display:none}
+    .page.active{display:block}
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+    input[type="search"]{padding:8px;border-radius:8px;border:1px solid #ddd;width:260px}
+    select{padding:8px;border-radius:8px;border:1px solid #ddd}
+    #cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:14px}
+    .card{position:relative;background:#fff;border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(20,30,60,0.06);display:flex;flex-direction:column;gap:8px}
+    .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;border-top-left-radius:10px;border-bottom-left-radius:10px;background:#ddd}
+    .level-visoka::before{background:linear-gradient(180deg,var(--danger),#b83a36)}
+    .level-umerena::before{background:linear-gradient(180deg,var(--warn),#d08b2e)}
+    .level-realno::before{background:linear-gradient(180deg,var(--ok),#3f8f3f)}
+    .level-nestambeni::before{background:linear-gradient(180deg,var(--info),#3aa6c9)}
+    .card-header{display:flex;align-items:flex-start;gap:12px}
+    .voters{font-weight:800;font-size:1.6rem;min-width:72px;text-align:center}
+    .addr-wrap{flex:1;display:flex;flex-direction:column;gap:6px}
+    .address{font-weight:700}
+    .sub{color:var(--muted);font-size:0.9rem}
+    .meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .meta-pill{background:#f6f7fb;padding:6px 8px;border-radius:8px;font-weight:600;font-size:0.88rem}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border-radius:999px;color:#fff;font-size:0.82rem;font-weight:700}
+    .badge.visoka{background:var(--danger)}
+    .badge.umerena{background:var(--warn);color:#222}
+    .badge.realno{background:var(--ok)}
+    .badge.nestambeni{background:var(--info);color:#222}
+    .icon{width:16px;height:16px}
+    .pager{display:flex;gap:8px;align-items:center;margin-top:12px}
+    .page-input{width:56px;padding:6px;border-radius:6px;border:1px solid #ddd}
+    .verified-toggle{margin-left:auto;display:flex;gap:8px;align-items:center}
+    .verified-toggle button{background:#fff;border:1px solid #ddd;padding:6px;border-radius:8px;cursor:pointer}
+    .muted{color:var(--muted);font-size:0.9rem}
+    .error{color:#b00;font-weight:700;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Landing -->
+    <section id="landing" class="page active">
+      <header>
+        <div>
+          <h1>Адресе са неуобичајеним бројем бирача</h1>
+          <div class="muted">Општина <strong>NOVI BEOGRAD</strong></div>
+        </div>
+      </header>
+      <p class="lead">Број уписаних бирача на адреси је јаван податак. Процена броја станова није званична.</p>
+      <div class="stats">
+        <div class="stat"><strong id="stat-addresses">66</strong>адреса</div>
+        <div class="stat"><strong id="stat-voters">1.706</strong>бирача</div>
+        <div class="stat"><strong id="stat-streets">44</strong>улица</div>
+        <div class="stat"><strong id="stat-verified">6 / 66</strong>проверено</div>
+      </div>
+      <button id="btnContinue" class="btn primary">Настави</button>
+    </section>
+
+    <!-- Cards -->
+    <section id="cardsPage" class="page">
+      <header style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Нови Београд — детаљан преглед</h2>
+        <button id="btnBack" class="btn ghost">Назад</button>
+      </header>
+      <div class="controls">
+        <input id="search" type="search" placeholder="Претрага" />
+        <select id="filterType">
+          <option value="">Сви налази</option>
+          <option value="visoka">Висока</option>
+          <option value="umerena">Умерена</option>
+          <option value="realno">Реално</option>
+          <option value="nestambeni">Нестамбени</option>
+        </select>
+        <button id="btnLoad" class="btn primary">Учитај CSV</button>
+        <button id="btnExport" class="btn ghost">Извези</button>
+      </div>
+      <div id="cards"></div>
+      <div class="pager">
+        <button id="prevPage" class="btn ghost">Претходна</button>
+        <button id="nextPage" class="btn ghost">Следећа</button>
+        <input id="pageInput" class="page-input" type="number" min="1" value="1" />
+        <select id="pageSize"><option>10</option><option>25</option><option selected>50</option></select>
+        <div id="pageInfo" class="muted"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Ikonice -->
+  <svg style="display:none">
+    <symbol id="icon-house" viewBox="0 0 24 24">
