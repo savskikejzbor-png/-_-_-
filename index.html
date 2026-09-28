@@ -2,243 +2,191 @@
 <html lang="sr">
 <head>
   <meta charset="utf-8" />
-  <title>Адресе са неуобичајеним бројем бирача</title>
-
-  <!-- DataTables CSS -->
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-  <!-- Leaflet CSS (опционо за мапу) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
+  <title>Adrese — pojedinačni prikaz</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; color:#222; }
-    h1 { margin-bottom: 6px; }
-    p.lead { margin-top:0; color:#444; max-width:900px; }
-    .stats { display:flex; gap:16px; margin:18px 0 24px; flex-wrap:wrap; }
-    .stat { background:#f7f7f9; padding:12px 18px; border-radius:8px; box-shadow:0 1px 0 rgba(0,0,0,0.03); min-width:140px; text-align:center; }
-    .stat strong { display:block; font-size:1.4rem; color:#111; }
-    #controls { margin:12px 0; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    #map { height:400px; margin-top:18px; border-radius:8px; display:none; }
-    table.dataTable thead th { background:#fafafa; }
-    .badge { display:inline-block; padding:4px 8px; border-radius:12px; font-size:0.85rem; color:#fff; }
-    .badge.high { background:#d9534f; } /* висока концентрација */
-    .badge.moderate { background:#f0ad4e; } /* умерена */
-    .badge.ok { background:#5cb85c; } /* делује реално */
-    .badge.nonres { background:#5bc0de; } /* нестамбени */
+    body { font-family: Arial, Helvetica, sans-serif; margin:18px; color:#222; background:#fafafa; }
+    h1 { margin:0 0 8px 0; }
+    p.lead { margin:0 0 18px 0; color:#444; max-width:900px; }
+    #controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:12px 0 18px 0; }
+    input[type="search"] { padding:8px 10px; border-radius:6px; border:1px solid #ccc; width:260px; }
+    select, button { padding:8px 10px; border-radius:6px; border:1px solid #bbb; background:#fff; cursor:pointer; }
+    #cards { display:grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap:12px; margin-top:12px; }
+    .card { background:#fff; border-radius:8px; padding:12px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .addr { font-weight:700; font-size:1.05rem; margin-bottom:6px; }
+    .meta { color:#555; font-size:0.95rem; margin-bottom:8px; }
+    .badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .badge { padding:6px 8px; border-radius:999px; color:#fff; font-size:0.85rem; }
+    .badge.visoka { background:#d9534f; }
+    .badge.umerena { background:#f0ad4e; color:#222; }
+    .badge.realno { background:#5cb85c; }
+    .badge.nestambeni { background:#5bc0de; color:#222; }
+    .badge.sporno { background:#6f42c1; }
+    .small { font-size:0.85rem; color:#666; }
+    .muted { color:#777; font-size:0.9rem; }
+    .stat-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+    .stat { background:#f6f6f8; padding:6px 8px; border-radius:6px; font-weight:600; color:#111; }
+    .empty-note { color:#b00; font-weight:600; }
   </style>
 </head>
 <body>
-  <h1>Адресе са неуобичајеним бројем бирача</h1>
-  <p class="lead">
-    Број уписаних бирача на адреси је јаван податак. Процена броја станова долази из евиденције о објектима и није званична.
-    Однос та два броја није доказ неправилности — он само показује где је вредно питати некога ко познаје крај.
-  </p>
-
-  <div class="stats">
-    <div class="stat"><strong id="count-addresses">0</strong>адреса на листи</div>
-    <div class="stat"><strong id="count-voters">0</strong>уписаних бирача</div>
-    <div class="stat"><strong id="count-streets">0</strong>улица</div>
-    <div class="stat"><strong id="count-verified">0</strong>проверено на терену</div>
-  </div>
+  <h1>Адресе — појединачни приказ</h1>
+  <p class="lead">Филтрирај и прегледај сваку адресу као посебну картицу. Ознаке показују врсту налаза.</p>
 
   <div id="controls">
-    <label for="fileInput">Фајл (CSV/TSV):</label>
-    <input id="fileInput" type="file" accept=".csv,text/csv,text/plain" />
-    <button id="reloadBtn">Учитај NOVI_BEOGRAD.csv</button>
-    <div style="margin-left:12px;color:#666">Име фајла у коду: <code>NOVI_BEOGRAD.csv</code></div>
+    <input id="search" type="search" placeholder="Претрага по адреси или броју бирача" />
+    <select id="filterType">
+      <option value="">Сви налази</option>
+      <option value="visoka koncentracija">Висока концентрација</option>
+      <option value="umerena koncentracija">Умерена концентрација</option>
+      <option value="deluje realno">Делује реално</option>
+      <option value="nestambena adresa">Нестамбени објекат</option>
+      <option value="i dalje sporno">И даље спорно</option>
+    </select>
+    <button id="reload">Учитај NOVI_BEOGRAD_V1.csv</button>
+    <div class="muted">Фајл: <strong>NOVI_BEOGRAD_V1.csv</strong></div>
   </div>
 
-  <h2>Преглед података</h2>
-  <table id="tabela" class="display" style="width:100%"></table>
+  <div id="cards" aria-live="polite"></div>
 
-  <div id="map"></div>
-
-  <!-- Скрипте -->
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <script>
-    const CSV_NAME = "NOVI_BEOGRAD.csv"; // ако желиш друго име, промени овде
+    const CSV_NAME = "NOVI_BEOGRAD_V1.csv";
 
-    // Помоћна: детектује да ли је текст TSV (таб) или CSV (запета)
-    function detectDelimiter(sample) {
-      const commaCount = (sample.match(/,/g) || []).length;
-      const tabCount = (sample.match(/\t/g) || []).length;
-      return tabCount > commaCount ? "\t" : ",";
+    function normalize(s){ return (s||"").toString().trim(); }
+
+    function findColumn(obj, candidates){
+      for(const c of candidates){
+        for(const key of Object.keys(obj)){
+          if(key.toLowerCase().replace(/\s+/g,'').includes(c.toLowerCase().replace(/\s+/g,''))) return key;
+        }
+      }
+      return null;
     }
 
-    // Претвара називе колона у пријатнији облик (ако треба)
-    function normalizeHeader(h) {
-      return h.trim();
+    function mapBadges(row){
+      // pokušaj prvo iz kolone "Vrste nalaza", pa fallback na sve vrednosti
+      const vrsteKey = findColumn(row, ["vrstenalaza","vrste","nalaz","vrste nalaza"]);
+      let vrste = vrsteKey ? normalize(row[vrsteKey]).toLowerCase() : Object.values(row).join(" ").toLowerCase();
+      const badges = [];
+      if(/visoka/i.test(vrste)) badges.push({cls:"visoka", text:"Висока концентрација"});
+      if(/umeren|umerena/i.test(vrste)) badges.push({cls:"umerena", text:"Умерена концентрација"});
+      if(/delu|делује|realno/i.test(vrste)) badges.push({cls:"realno", text:"Делује реално"});
+      if(/nestamben|nestambena|nonres/i.test(vrste)) badges.push({cls:"nestambeni", text:"Нестамбени објекат"});
+      if(/sporno|и даље спорно|i dalje sporno/i.test(vrste)) badges.push({cls:"sporno", text:"И даље спорно"});
+      if(badges.length===0) badges.push({cls:"realno", text:"Нема ознаке"});
+      return badges;
     }
 
-    // Учитај фајл са сервера (fetch) или локално преко input[type=file]
-    async function fetchCSVByName(name) {
+    function renderCard(row){
+      const addrKey = findColumn(row, ["column1","адреса","address","column"]);
+      const votersKey = findColumn(row, ["biracaukupno","birača","birača ukupno","birača"]);
+      const stanovaKey = findColumn(row, ["stanova","stanova","apartments"]);
+      const povKey = findColumn(row, ["povrsina","површина","površinaosnove","površinaosnove(m2)"]);
+      const tipKey = findColumn(row, ["tipobjekta","tip","tip objekta"]);
+      const prebKey = findColumn(row, ["prebivaliste","prebivalište"]);
+      const borKey = findColumn(row, ["boraviste","boravište"]);
+
+      const addr = normalize(addrKey ? row[addrKey] : "");
+      const voters = normalize(votersKey ? row[votersKey] : "");
+      const stanova = normalize(stanovaKey ? row[stanovaKey] : "");
+      const pov = normalize(povKey ? row[povKey] : "");
+      const tip = normalize(tipKey ? row[tipKey] : "");
+      const preb = normalize(prebKey ? row[prebKey] : "");
+      const bor = normalize(borKey ? row[borKey] : "");
+
+      const badges = mapBadges(row);
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.addr = addr.toLowerCase();
+      card.dataset.voters = voters;
+      card.dataset.type = badges.map(b=>b.text.toLowerCase()).join(" ");
+
+      const addrHtml = `<div class="addr">${addr || "<span class='empty-note'>Адреса није унетa</span>"}</div>`;
+      const metaHtml = `<div class="meta"><span class="small"><strong>${voters||"—"}</strong> бирача</span> · <span class="small">${stanova? stanova + " станова" : "станови: н/д"}</span></div>`;
+      const details = `<div class="stat-row">
+        <div class="stat">Пребивалиште: ${preb || "н/д"}</div>
+        <div class="stat">Борaвиште: ${bor || "н/д"}</div>
+        <div class="stat">Тип: ${tip || "н/д"}</div>
+        <div class="stat">Површина: ${pov || "н/д"}</div>
+      </div>`;
+      const badgesHtml = `<div class="badges">${badges.map(b=>`<span class="badge ${b.cls}">${b.text}</span>`).join("")}</div>`;
+
+      card.innerHTML = addrHtml + metaHtml + details + badgesHtml;
+      return card;
+    }
+
+    async function loadCSVText(){
       try {
-        const r = await fetch(name);
-        if (!r.ok) throw new Error("Не могу да учитам фајл: " + r.status);
-        const text = await r.text();
-        return text;
-      } catch (e) {
+        const r = await fetch(CSV_NAME);
+        if(!r.ok) throw new Error("Не могу да учитам фајл");
+        return await r.text();
+      } catch(e){
         console.warn(e);
         return null;
       }
     }
 
-    // Главна функција: parse и рендер
-    async function loadAndRender(text) {
-      if (!text) {
-        alert("Није пронађен CSV фајл. Употријеби дугме 'Учитај' или отпреми фајл ручно.");
-        return;
-      }
-
-      const delim = detectDelimiter(text.slice(0, 2000));
+    async function renderFromText(text){
+      if(!text){ alert("Не могу да учитам CSV. Постави NOVI_BEOGRAD_V1.csv у исти фолдер или отпреми локално."); return; }
+      const sample = text.slice(0,2000);
+      const delim = (sample.match(/\t/g)||[]).length > (sample.match(/,/g)||[]).length ? "\t" : ",";
       const parsed = Papa.parse(text, { delimiter: delim, skipEmptyLines: true });
-      if (!parsed || !parsed.data || parsed.data.length === 0) {
-        alert("CSV није правилно форматиран.");
-        return;
-      }
-
-      // Претпостављамо да је први ред заглавље
-      let header = parsed.data[0].map(normalizeHeader);
-      let rows = parsed.data.slice(1);
-
-      // Ако постоје празни редови на крају, филтрирај
-      rows = rows.filter(r => r.some(cell => cell !== undefined && String(cell).trim() !== ""));
-
-      // Претвори у објекте
-      const dataObjects = rows.map(r => {
+      if(!parsed || !parsed.data || parsed.data.length<1){ alert("CSV није правилан"); return; }
+      const header = parsed.data[0].map(h=>h.trim());
+      const rows = parsed.data.slice(1).filter(r=> r.some(c=> (c||"").toString().trim() !== "") );
+      const objects = rows.map(r=>{
         const obj = {};
-        for (let i = 0; i < header.length; i++) {
-          obj[header[i] || ("col" + i)] = r[i] !== undefined ? r[i] : "";
-        }
+        for(let i=0;i<header.length;i++) obj[header[i]||("col"+i)] = r[i]!==undefined ? r[i] : "";
         return obj;
       });
 
-      // Статистике
-      const addressesCount = dataObjects.length;
-      const votersSum = dataObjects.reduce((s, row) => {
-        const v = parseFloat(row["Birača ukupno"] || row["Birača ukupno".replace(/\s/g,"")] || row["Birača"] || row["Birača"] || row["Birača ukupno"] || row["Birača ukupno"]) || 0;
-        // fallback: check common column names
-        const alt = parseFloat(row["Birača ukupno"] || row["Birača ukupno"]) || 0;
-        return s + (isNaN(v) ? alt : v);
-      }, 0);
-
-      // број различитих улица (из колоне Column1 или адреса)
-      const streetSet = new Set();
-      dataObjects.forEach(r => {
-        const addr = r["Column1"] || r["Адреса"] || r["Column1"] || r["Column1"];
-        if (addr) {
-          // извучемо само улицу (пре броја) ако је формат "УЛИЦА НБР"
-          const parts = String(addr).trim().split(/\s+/);
-          if (parts.length > 1) {
-            // узмемо прва два дела као репрезентативну улицу
-            streetSet.add(parts.slice(0, Math.max(1, parts.length-1)).join(" "));
-          } else {
-            streetSet.add(addr.trim());
-          }
-        }
-      });
-
-      // број верификованих: тражимо у колони "Vrste nalaza" или у било којој колони речи "провер" или "проверено"
-      const verifiedCount = dataObjects.filter(r => {
-        return Object.values(r).some(v => {
-          if (!v) return false;
-          const s = String(v).toLowerCase();
-          return s.includes("провер") || s.includes("prover") || s.includes("проверено") || s.includes("verified");
-        });
-      }).length;
-
-      // Прикажи статистике
-      document.getElementById("count-addresses").textContent = addressesCount;
-      document.getElementById("count-voters").textContent = votersSum;
-      document.getElementById("count-streets").textContent = streetSet.size;
-      document.getElementById("count-verified").textContent = verifiedCount;
-
-      // Припреми DataTables колоне
-      const columns = header.map(h => ({ title: h, data: h }));
-
-      // Ако већ постоји DataTable, уништи га
-      if ($.fn.dataTable.isDataTable('#tabela')) {
-        $('#tabela').DataTable().clear().destroy();
-        $('#tabela').empty();
-      }
-
-      // Иницирај DataTable
-      $('#tabela').DataTable({
-        data: dataObjects,
-        columns: columns,
-        pageLength: 15,
-        language: {
-          url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/sr.json"
-        },
-        createdRow: function(row, data, dataIndex) {
-          // Ако постоји колона "Vrste nalaza" или "Vrste nalaza" садржи речи, додај ознаку
-          const vrste = data["Vrste nalaza"] || data["Vrste nalaza".replace(/\s/g,"")] || data["Vrste nalaza"];
-          if (vrste && /visoka/i.test(vrste)) {
-            // додај класу или стил ако желиш
-          }
-        }
-      });
-
-      // Ако постоје lat и lon колоне, прикажи мапу
-      const hasLat = header.some(h => h.toLowerCase().includes("lat"));
-      const hasLon = header.some(h => h.toLowerCase().includes("lon") || h.toLowerCase().includes("lng"));
-      if (hasLat && hasLon) {
-        document.getElementById("map").style.display = "block";
-        // иницирај мапу
-        const map = L.map('map').setView([44.8, 20.4], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        dataObjects.forEach(r => {
-          const lat = parseFloat(r[ header.find(h => h.toLowerCase().includes("lat")) ]);
-          const lon = parseFloat(r[ header.find(h => h.toLowerCase().includes("lon") || h.toLowerCase().includes("lng")) ]);
-          if (!isNaN(lat) && !isNaN(lon)) {
-            const popup = Object.entries(r).map(([k,v]) => `<strong>${k}</strong>: ${v}`).join("<br>");
-            L.marker([lat, lon]).addTo(map).bindPopup(popup);
-          }
-        });
-      } else {
-        document.getElementById("map").style.display = "none";
-      }
+      const container = document.getElementById("cards");
+      container.innerHTML = "";
+      objects.forEach(o => container.appendChild(renderCard(o)));
+      applyFilters();
     }
 
-    // Покушај да учиташ фајл са сервера по имену
-    async function tryLoadDefault() {
-      const text = await fetchCSVByName(CSV_NAME);
-      if (text) {
-        await loadAndRender(text);
-      } else {
-        // ништа, чекај да корисник отпреми фајл
-      }
+    function applyFilters(){
+      const q = document.getElementById("search").value.trim().toLowerCase();
+      const type = document.getElementById("filterType").value.trim().toLowerCase();
+      const cards = Array.from(document.querySelectorAll(".card"));
+      cards.forEach(c=>{
+        const matchesQ = !q || c.dataset.addr.includes(q) || (c.dataset.voters && c.dataset.voters.includes(q));
+        const matchesType = !type || c.dataset.type.includes(type);
+        c.style.display = (matchesQ && matchesType) ? "" : "none";
+      });
     }
 
-    // Догађаји
-    document.getElementById("reloadBtn").addEventListener("click", async () => {
-      const text = await fetchCSVByName(CSV_NAME);
-      if (!text) {
-        alert("Не могу да пронађем " + CSV_NAME + " у истом фолдеру. Можете га отпремити ручно.");
+    document.getElementById("search").addEventListener("input", applyFilters);
+    document.getElementById("filterType").addEventListener("change", applyFilters);
+    document.getElementById("reload").addEventListener("click", async ()=>{
+      const text = await loadCSVText();
+      if(!text){
+        // ako fetch ne radi, otvori file picker
+        const fi = document.createElement("input");
+        fi.type = "file";
+        fi.accept = ".csv,text/csv,text/plain";
+        fi.onchange = e => {
+          const f = e.target.files[0];
+          if(!f) return;
+          const reader = new FileReader();
+          reader.onload = ev => renderFromText(ev.target.result);
+          reader.readAsText(f, "utf-8");
+        };
+        fi.click();
         return;
       }
-      await loadAndRender(text);
+      await renderFromText(text);
     });
 
-    document.getElementById("fileInput").addEventListener("change", (ev) => {
-      const f = ev.target.files[0];
-      if (!f) return;
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        await loadAndRender(e.target.result);
-      };
-      reader.readAsText(f, "utf-8");
-    });
-
-    // Покрени аутоматски покушај учитавања
-    tryLoadDefault();
+    // automatsko učitavanje pri otvaranju
+    (async ()=> {
+      const text = await loadCSVText();
+      if(text) await renderFromText(text);
+    })();
   </script>
 </body>
 </html>
