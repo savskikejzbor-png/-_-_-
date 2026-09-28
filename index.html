@@ -2,60 +2,141 @@
 <html lang="sr">
 <head>
   <meta charset="utf-8" />
-  <title>Adrese — pojedinačni prikaz</title>
+  <title>Адресе са неуобичајеним бројем бирача — Нови Београд</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css">
   <style>
-    body { font-family: Arial, Helvetica, sans-serif; margin:18px; color:#222; background:#fafafa; }
-    h1 { margin:0 0 8px 0; }
-    p.lead { margin:0 0 18px 0; color:#444; max-width:900px; }
-    #controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:12px 0 18px 0; }
-    input[type="search"] { padding:8px 10px; border-radius:6px; border:1px solid #ccc; width:260px; }
-    select, button { padding:8px 10px; border-radius:6px; border:1px solid #bbb; background:#fff; cursor:pointer; }
-    #cards { display:grid; grid-template-columns: repeat(auto-fill,minmax(320px,1fr)); gap:12px; margin-top:12px; }
-    .card { background:#fff; border-radius:8px; padding:12px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .addr { font-weight:700; font-size:1.05rem; margin-bottom:6px; }
-    .meta { color:#555; font-size:0.95rem; margin-bottom:8px; }
-    .badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-    .badge { padding:6px 8px; border-radius:999px; color:#fff; font-size:0.85rem; }
-    .badge.visoka { background:#d9534f; }
-    .badge.umerena { background:#f0ad4e; color:#222; }
-    .badge.realno { background:#5cb85c; }
-    .badge.nestambeni { background:#5bc0de; color:#222; }
-    .badge.sporno { background:#6f42c1; }
-    .small { font-size:0.85rem; color:#666; }
-    .muted { color:#777; font-size:0.9rem; }
-    .stat-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
-    .stat { background:#f6f6f8; padding:6px 8px; border-radius:6px; font-weight:600; color:#111; }
-    .empty-note { color:#b00; font-weight:600; }
+    :root{--accent:#2b6cb0;--muted:#666}
+    body{font-family:Inter,Arial,Helvetica,sans-serif;margin:18px;background:#f7f8fb;color:#222}
+    .container{max-width:1100px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{margin:0;font-size:1.4rem}
+    p.lead{margin:6px 0 18px;color:var(--muted)}
+    /* stats */
+    .stats{display:flex;gap:14px;flex-wrap:wrap;margin:18px 0}
+    .stat{background:#fff;padding:14px;border-radius:10px;min-width:150px;box-shadow:0 1px 6px rgba(20,20,40,0.04);text-align:center}
+    .stat strong{display:block;font-size:1.4rem}
+    /* landing actions */
+    .actions{display:flex;gap:10px;align-items:center}
+    .btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+    .btn.primary{background:var(--accent);color:#fff}
+    .btn.ghost{background:#fff;border:1px solid #ddd}
+    /* page sections */
+    .page{display:none}
+    .page.active{display:block}
+    /* cards grid */
+    #cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:14px}
+    .card{background:#fff;padding:12px;border-radius:10px;box-shadow:0 1px 6px rgba(20,20,40,0.04)}
+    .addr{font-weight:700;margin-bottom:6px}
+    .meta{color:var(--muted);font-size:0.95rem;margin-bottom:8px}
+    .badges{display:flex;gap:8px;flex-wrap:wrap}
+    .badge{padding:6px 8px;border-radius:999px;color:#fff;font-size:0.85rem}
+    .badge.visoka{background:#d9534f}
+    .badge.umerena{background:#f0ad4e;color:#222}
+    .badge.realno{background:#5cb85c}
+    .badge.nestambeni{background:#5bc0de;color:#222}
+    .badge.sporno{background:#6f42c1}
+    /* controls */
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}
+    input[type="search"]{padding:8px;border-radius:8px;border:1px solid #ddd;width:260px}
+    select{padding:8px;border-radius:8px;border:1px solid #ddd}
+    .muted{color:var(--muted);font-size:0.9rem}
+    footer{margin-top:22px;color:var(--muted);font-size:0.9rem}
   </style>
 </head>
 <body>
-  <h1>Адресе — појединачни приказ</h1>
-  <p class="lead">Филтрирај и прегледај сваку адресу као посебну картицу. Ознаке показују врсту налаза.</p>
+  <div class="container">
+    <!-- PAGE 1: Landing -->
+    <section id="page-landing" class="page active" aria-labelledby="landing-title">
+      <header>
+        <div>
+          <h1 id="landing-title">Адресе са неуобичајеним бројем бирача</h1>
+          <div class="muted">Општина <strong id="municipality">NOVI BEOGRAD</strong></div>
+        </div>
+        <div class="actions">
+          <button id="langToggle" class="btn ghost">Ћир/Lat</button>
+        </div>
+      </header>
 
-  <div id="controls">
-    <input id="search" type="search" placeholder="Претрага по адреси или броју бирача" />
-    <select id="filterType">
-      <option value="">Сви налази</option>
-      <option value="visoka koncentracija">Висока концентрација</option>
-      <option value="umerena koncentracija">Умерена концентрација</option>
-      <option value="deluje realno">Делује реално</option>
-      <option value="nestambena adresa">Нестамбени објекат</option>
-      <option value="i dalje sporno">И даље спорно</option>
-    </select>
-    <button id="reload">Учитај NOVI_BEOGRAD_V1.csv</button>
-    <div class="muted">Фајл: <strong>NOVI_BEOGRAD_V1.csv</strong></div>
+      <p class="lead">
+        Број уписаних бирача на адреси је јаван податак. Процена броја станова долази из евиденције о објектима и није званична.
+        Однос та два броја није доказ неправилности — он само показује где је вредно питати некога ко познаје крај.
+      </p>
+
+      <div class="stats" role="list">
+        <div class="stat" role="listitem"><strong id="stat-addresses">66</strong>адреса на листи</div>
+        <div class="stat" role="listitem"><strong id="stat-voters">1.706</strong>уписаних бирача</div>
+        <div class="stat" role="listitem"><strong id="stat-streets">44</strong>улица</div>
+        <div class="stat" role="listitem"><strong id="stat-verified">24 / 66</strong>проверено на терену</div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center">
+        <button id="btnContinue" class="btn primary">Настави</button>
+        <button id="btnWhy" class="btn ghost">Зашто ово радимо</button>
+      </div>
+    </section>
+
+    <!-- PAGE 2: Cards / Data -->
+    <section id="page-cards" class="page" aria-labelledby="cards-title">
+      <header style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h1 id="cards-title">Нови Београд — детаљан преглед</h1>
+          <div class="muted">Фајл: <strong>NOVI_BEOGRAD_V1.csv</strong></div>
+        </div>
+        <div>
+          <button id="btnBack" class="btn ghost">Назад</button>
+        </div>
+      </header>
+
+      <div class="controls">
+        <input id="search" type="search" placeholder="Претрага по адреси или броју бирача" />
+        <select id="filterType">
+          <option value="">Сви налази</option>
+          <option value="visoka koncentracija">Висока концентрација</option>
+          <option value="umerena koncentracija">Умерена концентрација</option>
+          <option value="deluje realno">Делује реално</option>
+          <option value="nestambena adresa">Нестамбени објекат</option>
+          <option value="i dalje sporno">И даље спорно</option>
+        </select>
+        <button id="reload" class="btn primary">Учитај NOVI_BEOGRAD_V1.csv</button>
+        <div class="muted">Ако fetch не пронађе фајл, кликни на дугме и отпреми локално.</div>
+      </div>
+
+      <div id="cards" aria-live="polite"></div>
+
+      <footer>
+        Податке користите одговорно. Ова страница не садржи личне податке осим јавно доступних бројева бирача по адреси.
+      </footer>
+    </section>
   </div>
 
-  <div id="cards" aria-live="polite"></div>
-
+  <!-- Скрипте -->
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
   <script>
+    // Конфигурација
     const CSV_NAME = "NOVI_BEOGRAD_V1.csv";
 
-    function normalize(s){ return (s||"").toString().trim(); }
+    // Прелаз између страна
+    const pageLanding = document.getElementById('page-landing');
+    const pageCards = document.getElementById('page-cards');
+    document.getElementById('btnContinue').addEventListener('click', ()=> {
+      pageLanding.classList.remove('active');
+      pageCards.classList.add('active');
+      // аутоматски покушај учитавања CSV-а
+      loadAndRenderCSV();
+    });
+    document.getElementById('btnBack').addEventListener('click', ()=> {
+      pageCards.classList.remove('active');
+      pageLanding.classList.add('active');
+    });
 
+    // Једноставан language toggle (само пример, не мења садржај)
+    document.getElementById('langToggle').addEventListener('click', ()=>{
+      alert('Пребацивање писма: кратак пример (не мења садржај у овом шаблону).');
+    });
+
+    // Помоћне функције
+    function normalize(s){ return (s||"").toString().trim(); }
     function findColumn(obj, candidates){
       for(const c of candidates){
         for(const key of Object.keys(obj)){
@@ -66,7 +147,6 @@
     }
 
     function mapBadges(row){
-      // pokušaj prvo iz kolone "Vrste nalaza", pa fallback na sve vrednosti
       const vrsteKey = findColumn(row, ["vrstenalaza","vrste","nalaz","vrste nalaza"]);
       let vrste = vrsteKey ? normalize(row[vrsteKey]).toLowerCase() : Object.values(row).join(" ").toLowerCase();
       const badges = [];
@@ -82,8 +162,8 @@
     function renderCard(row){
       const addrKey = findColumn(row, ["column1","адреса","address","column"]);
       const votersKey = findColumn(row, ["biracaukupno","birača","birača ukupno","birača"]);
-      const stanovaKey = findColumn(row, ["stanova","stanova","apartments"]);
-      const povKey = findColumn(row, ["povrsina","површина","površinaosnove","površinaosnove(m2)"]);
+      const stanovaKey = findColumn(row, ["stanova","apartments"]);
+      const povKey = findColumn(row, ["povrsina","површина","površinaosnove"]);
       const tipKey = findColumn(row, ["tipobjekta","tip","tip objekta"]);
       const prebKey = findColumn(row, ["prebivaliste","prebivalište"]);
       const borKey = findColumn(row, ["boraviste","boravište"]);
@@ -104,23 +184,21 @@
       card.dataset.voters = voters;
       card.dataset.type = badges.map(b=>b.text.toLowerCase()).join(" ");
 
-      const addrHtml = `<div class="addr">${addr || "<span class='empty-note'>Адреса није унетa</span>"}</div>`;
-      const metaHtml = `<div class="meta"><span class="small"><strong>${voters||"—"}</strong> бирача</span> · <span class="small">${stanova? stanova + " станова" : "станови: н/д"}</span></div>`;
-      const details = `<div class="stat-row">
-        <div class="stat">Пребивалиште: ${preb || "н/д"}</div>
-        <div class="stat">Борaвиште: ${bor || "н/д"}</div>
-        <div class="stat">Тип: ${tip || "н/д"}</div>
-        <div class="stat">Површина: ${pov || "н/д"}</div>
+      const addrHtml = `<div class="addr">${addr || "<span style='color:#b00;font-weight:700'>Адреса није унетa</span>"}</div>`;
+      const metaHtml = `<div class="meta"><strong>${voters||"—"}</strong> бирача · ${stanova? stanova + " станова" : "станови: н/д"}</div>`;
+      const details = `<div style="margin-top:8px;color:var(--muted);font-size:0.95rem">
+        Тип: ${tip || "н/д"} · Површина: ${pov || "н/д"} · Пребивалиште: ${preb || "н/д"}
       </div>`;
-      const badgesHtml = `<div class="badges">${badges.map(b=>`<span class="badge ${b.cls}">${b.text}</span>`).join("")}</div>`;
+      const badgesHtml = `<div class="badges" style="margin-top:10px">${badges.map(b=>`<span class="badge ${b.cls}">${b.text}</span>`).join("")}</div>`;
 
       card.innerHTML = addrHtml + metaHtml + details + badgesHtml;
       return card;
     }
 
-    async function loadCSVText(){
+    // Учитавање CSV-а
+    async function fetchCSVText(name){
       try {
-        const r = await fetch(CSV_NAME);
+        const r = await fetch(name);
         if(!r.ok) throw new Error("Не могу да учитам фајл");
         return await r.text();
       } catch(e){
@@ -129,8 +207,16 @@
       }
     }
 
-    async function renderFromText(text){
-      if(!text){ alert("Не могу да учитам CSV. Постави NOVI_BEOGRAD_V1.csv у исти фолдер или отпреми локално."); return; }
+    async function loadAndRenderCSV(){
+      const text = await fetchCSVText(CSV_NAME);
+      if(!text){
+        // ако нема фајла на серверу, остави празно — корисник може да кликне на дугме и отпреми
+        return;
+      }
+      renderFromText(text);
+    }
+
+    function renderFromText(text){
       const sample = text.slice(0,2000);
       const delim = (sample.match(/\t/g)||[]).length > (sample.match(/,/g)||[]).length ? "\t" : ",";
       const parsed = Papa.parse(text, { delimiter: delim, skipEmptyLines: true });
@@ -149,6 +235,7 @@
       applyFilters();
     }
 
+    // Филтер и отпремање
     function applyFilters(){
       const q = document.getElementById("search").value.trim().toLowerCase();
       const type = document.getElementById("filterType").value.trim().toLowerCase();
@@ -160,12 +247,13 @@
       });
     }
 
-    document.getElementById("search").addEventListener("input", applyFilters);
-    document.getElementById("filterType").addEventListener("change", applyFilters);
-    document.getElementById("reload").addEventListener("click", async ()=>{
-      const text = await loadCSVText();
+    document.getElementById('search').addEventListener('input', applyFilters);
+    document.getElementById('filterType').addEventListener('change', applyFilters);
+
+    document.getElementById('reload').addEventListener('click', async ()=>{
+      const text = await fetchCSVText(CSV_NAME);
       if(!text){
-        // ako fetch ne radi, otvori file picker
+        // отвори file picker
         const fi = document.createElement("input");
         fi.type = "file";
         fi.accept = ".csv,text/csv,text/plain";
@@ -179,13 +267,12 @@
         fi.click();
         return;
       }
-      await renderFromText(text);
+      renderFromText(text);
     });
 
-    // automatsko učitavanje pri otvaranju
+    // Аутоматски покушај учитавања при отварању странице (landing -> cards ће покренути поново)
     (async ()=> {
-      const text = await loadCSVText();
-      if(text) await renderFromText(text);
+      // ништа посебно овде; учитавање се покреће када корисник пређе на другу страну
     })();
   </script>
 </body>
